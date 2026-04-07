@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================
+// ENUM types 
+// =============================================
+
+enum UserPresenceStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+  DO_NOT_DISTURB
+}
+
+enum UserCreationStatus {
+  ACTIVE
+  LOCKED
+  DISABLED
+}
+
+enum WorkspaceStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum MemberStatus {
+  ONLINE
+  OFFLINE
+  IDLE
+}
+
+enum RoleType {
+  ADMIN
+  OWNER
+  MEMBER
+}
+
+enum ChannelType {
+  PUBLIC
+  PRIVATE
+  DM
+  GROUP_DM
+}
+
+enum NotificationType {
+  DM_RECEIVED
+  MESSAGE_MENTION
+  THREAD_REPLY
+  TASK_ASSIGNED
+  INVITE_RECEIVED
+}
+
+enum EntityType {
+  TASK
+  MESSAGE
+  INVITATION
+}
+
+// =============================================
+// MODELS
+// =============================================
+
+model User {
+  id                    String   @id @default(uuid())
+  name                  String?
+  email                 String   @unique
+  password              String   // Not nullable - password is required for all users
+  is_email_verified     Boolean  @default(false)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+  user_presence_status  UserPresenceStatus? @default(OFFLINE)
+  user_creation_status  UserCreationStatus? @default(ACTIVE)
+
+  workspace_members WorkspaceMember[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  slug        String?
+  created_at  DateTime?
+  updated_at  DateTime @updatedAt
+  status      WorkspaceStatus @default(ACTIVE)
+
+  members     WorkspaceMember[]
+  channels    Channel[]
+
+  @@map("workspace")
+}
+
+model WorkspaceMember {
+  id             String     @id @default(uuid())
+  user           User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id        String
+  workspace      Workspace  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  workspace_id   String
+  role           RoleType?
+  display_name   String?
+  member_status  MemberStatus?
+  joined_at      DateTime?
+
+  channel_members ChannelMember[]
+  messages        Message[]
+  notifications   Notification[]
+
+  @@unique([user_id, workspace_id])
+  @@map("workspace_members")
+}
+
+model Channel {
+  id            String      @id @default(uuid())
+  name          String?
+  channel_type  ChannelType @default(PUBLIC)
+  is_archived   Boolean     @default(false)
+  created_at    DateTime    @default(now())
+  workspace_id  String
+  workspace     Workspace   @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+
+  members       ChannelMember[]
+  messages      Message[]
+
+  @@map("channel")
+}
+
+model ChannelMember {
+  id                   String          @id @default(uuid())
+  channel              Channel         @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  channel_id           String
+  workspace_member     WorkspaceMember @relation(fields: [workspace_member_id], references: [id], onDelete: Cascade)
+  workspace_member_id  String
+
+  @@unique([channel_id, workspace_member_id])
+  @@map("channel_member")
+}
+
+model Message {
+  id                String          @id @default(uuid())
+  channel           Channel         @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  channel_id        String
+  sender            WorkspaceMember @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+  sender_id         String
+  content           String?
+  parent_message    Message?        @relation("MessageReplies", fields: [parent_msg_id], references: [id], onDelete: SetNull)
+  parent_msg_id     String?
+  replies           Message[]       @relation("MessageReplies")
+  is_edited         Boolean         @default(false)
+  is_deleted        Boolean         @default(false)
+  created_at        DateTime?
+  edited_at         DateTime?
+
+  @@map("messages")
+}
+
+model Notification {
+  id                String           @id @default(uuid())
+  workspace_member  WorkspaceMember  @relation(fields: [workspace_member_id], references: [id], onDelete: Cascade)
+  workspace_member_id String
+  entity_type       EntityType
+  entity_id         String?
+  notification_type NotificationType
+  created_at        DateTime?
+  is_read           Boolean          @default(false)
+
+  @@map("notifications")
+}
