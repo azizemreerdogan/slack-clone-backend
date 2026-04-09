@@ -9,7 +9,6 @@ export const UserCreationStatusSchema = z.enum(['ACTIVE', 'LOCKED', 'DISABLED'])
 export const WorkspaceStatusSchema = z.enum(['ACTIVE', 'INACTIVE', 'ARCHIVED']);
 export const MemberStatusSchema = z.enum(['ONLINE', 'OFFLINE', 'IDLE']);
 export const RoleTypeSchema = z.enum(['ADMIN', 'OWNER', 'MEMBER']);
-export const ChannelTypeSchema = z.enum(['PUBLIC', 'PRIVATE', 'DM', 'GROUP_DM']);
 export const NotificationTypeSchema = z.enum(['DM_RECEIVED', 'MESSAGE_MENTION', 'THREAD_REPLY', 'TASK_ASSIGNED', 'INVITE_RECEIVED']);
 export const EntityTypeSchema = z.enum(['TASK', 'MESSAGE', 'INVITATION']);
 
@@ -62,6 +61,11 @@ export const UserRegisterResponseSchema = z.object({
 
 export const UserLoginResponseSchema = z.object({
   token: z.string()
+})
+
+export const userDeleteSchema = z.object({
+  id: z.uuid(),
+  email: z.email()
 })
 
 
@@ -123,30 +127,6 @@ export const WorkspaceMemberSchema = z.object({
   joined_at: z.date().nullable(),
 });
 
-// =============================================
-// Channel Schema
-// =============================================
-
-export const ChannelCreateSchema = z.object({
-  name: z.string().min(1, 'Channel name cannot be empty'),
-  channel_type: ChannelTypeSchema.default('PUBLIC'),
-  workspace_id: z.uuid('Invalid UUID format'),
-});
-
-export const ChannelUpdateSchema = z.object({
-  name: z.string().min(1, 'Channel name cannot be empty').optional(),
-  channel_type: ChannelTypeSchema.optional(),
-  is_archived: z.boolean().optional(),
-});
-
-export const ChannelSchema = z.object({
-  id: z.uuid('Invalid UUID format'),
-  name: z.string().nullable(),
-  channel_type: ChannelTypeSchema,
-  is_archived: z.boolean(),
-  created_at: z.date(),
-  workspace_id: z.uuid('Invalid UUID format'),
-});
 
 // =============================================
 // ChannelMember Schema
@@ -219,3 +199,4 @@ export type createUserInput = z.infer<typeof UserCreateSchema>;
 export type loginUserHandler = z.infer<typeof UserLoginSchema>;
 export type userRegisterResponseSchema = z.infer<typeof UserRegisterResponseSchema>;
 export type UserLoginResponseSchema = z.infer<typeof UserLoginResponseSchema>;
+export type userDeleteSchema = z.infer<typeof userDeleteSchema>;

@@ -1,7 +1,8 @@
-import { fastify, type FastifyReply, type FastifyRequest } from "fastify";
-import type { createUserInput, loginUserHandler } from "./user.schema.js";
+import {type FastifyReply, type FastifyRequest } from "fastify";
+import { userDeleteSchema, type createUserInput, type loginUserHandler } from "./user.schema.js";
 import { createUser, getUserByEmail } from "./user.service.js";
-import { verifyPassword } from "../utils/hash.js";
+import { verifyPassword } from "../../utils/hash.js";
+import { deleteUser } from "./user.service.js";
 
 export async function registerUserHandler(request: FastifyRequest<{
     Body: createUserInput
@@ -53,20 +54,47 @@ export async function loginUserHandler(request: FastifyRequest<{
             });
         };
 
-        const token = reply.jwtSign({
+        const token = await reply.jwtSign({
             id: user.id,
             email: user.email
         })
-
+        
         return reply.code(200).send({
             user: {
                 id: user.id,
                 email: user.email,
                 name: user.name
             },
-            token
+            token: token
+            
         });
     }catch(error){
         throw error;
     }
+}
+
+export async function deleteUserHandler(request: FastifyRequest<{
+    Body: userDeleteSchema
+}>, reply: FastifyReply){
+    
+    const email = request.user.email;
+    const id = request.user.id;
+    
+    console.log(email , id)
+    
+    try{
+        const user = await deleteUser(id,email)
+        
+        console.log(user)
+        return reply.code(200).send({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        })
+    }catch(error){
+        throw error
+    }
+       
 }

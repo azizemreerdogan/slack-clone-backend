@@ -4,6 +4,6 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
     try{
         await request.jwtVerify();
     } catch(err) {
-        reply.send(err);
+        throw err
     }
 }

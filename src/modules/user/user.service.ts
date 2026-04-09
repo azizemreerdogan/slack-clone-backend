@@ -1,7 +1,8 @@
 import type { createUserInput } from "./user.schema.js";
-import { hashPassword } from "../utils/hash.js";
-import prisma from '../lib/prisma.js'
-import { AppError } from "../errors/AppError.js";
+import { hashPassword } from "../../utils/hash.js";
+import prisma from '../../lib/prisma.js'
+import { AppError } from "../../errors/AppError.js";
+import type { UUID } from "node:crypto";
 
 export async function createUser(createUserInput : createUserInput){
     const { name, email, password} = createUserInput;
@@ -33,4 +34,17 @@ export async function getUsers(){
 export async function getUserByEmail(email : string){
     const user = await prisma.user.findUnique({where: {email}})
     return user;
+}
+
+export async function deleteUser(email : string, id: string){
+    const existingUser = await prisma.user.findUnique({where: {id,email}})
+    
+    
+    
+    try{
+        return await prisma.user.delete({where: {id,email}})
+    }catch(e){
+        throw new AppError(404, "User is not being used")
+    }
+    
 }
