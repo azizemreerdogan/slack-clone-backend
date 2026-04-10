@@ -109,7 +109,7 @@ model WorkspaceMember {
   user_id        String
   workspace      Workspace  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
   workspace_id   String
-  role           RoleType?
+  role           RoleType @default(MEMBER)
   display_name   String?
   member_status  MemberStatus?
   joined_at      DateTime?

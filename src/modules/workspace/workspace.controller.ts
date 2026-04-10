@@ -33,13 +33,13 @@ export async function createWorkspaceHandler(request: FastifyRequest<
 
 export async function getWorkspaceHandler(request: FastifyRequest<
     {
-        Body: {slug: string}
+        Params: {slug: string}
     }
     >, reply: FastifyReply){
 
-        const body = request.body
+        const slug = request.params.slug
         try{
-            const workspace = await getWorkspace(body.slug);
+            const workspace = await getWorkspace(slug);
             return reply.code(200).send(workspace)
         }catch(error){
             console.error(error);
@@ -49,15 +49,15 @@ export async function getWorkspaceHandler(request: FastifyRequest<
 
 export async function updateWorkspaceHandler(request: FastifyRequest<
     {
-        Params: { workspaceId: string },
+        Params: { workspace_id: string },
         Body: updateWorkspaceInput
     }
     >, reply: FastifyReply){
-        const { workspaceId } = request.params;
+        const { workspace_id } = request.params;
         const body = request.body;
 
         try{
-            const updatedWorkspace = await updateWorkspace(workspaceId, body);
+            const updatedWorkspace = await updateWorkspace(workspace_id, body);
             return reply.code(200).send(updatedWorkspace);
         }catch(error){
             console.error(error);
