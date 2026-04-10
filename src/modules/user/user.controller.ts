@@ -14,13 +14,17 @@ export async function registerUserHandler(request: FastifyRequest<{
 
         console.error(user)
 
-        const token = reply.jwtSign({
+        const token = await reply.jwtSign({
             id: user.id,
             email: user.email
         });
 
         return reply.code(201).send({
-            user,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            },
             token
         });
 

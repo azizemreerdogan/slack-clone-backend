@@ -6,7 +6,6 @@ import { z } from 'zod';
 
 export const UserPresenceStatusSchema = z.enum(['ONLINE', 'OFFLINE', 'AWAY', 'DO_NOT_DISTURB']);
 export const UserCreationStatusSchema = z.enum(['ACTIVE', 'LOCKED', 'DISABLED']);
-export const WorkspaceStatusSchema = z.enum(['ACTIVE', 'INACTIVE', 'ARCHIVED']);
 export const MemberStatusSchema = z.enum(['ONLINE', 'OFFLINE', 'IDLE']);
 export const RoleTypeSchema = z.enum(['ADMIN', 'OWNER', 'MEMBER']);
 export const NotificationTypeSchema = z.enum(['DM_RECEIVED', 'MESSAGE_MENTION', 'THREAD_REPLY', 'TASK_ASSIGNED', 'INVITE_RECEIVED']);
@@ -70,34 +69,6 @@ export const userDeleteSchema = z.object({
 
 
 //TODO: MOVE THESE SCHEMA'S TO RELATED FOLDERS ONLY USER SCHEMAS SHOULD STAY 
-
-
-// =============================================
-// Workspace Schema
-// =============================================
-
-export const WorkspaceCreateSchema = z.object({
-  name: z.string().min(1, 'Workspace name cannot be empty'),
-  description: z.string().optional(),
-  slug: z.string().optional(),
-});
-
-export const WorkspaceUpdateSchema = z.object({
-  name: z.string().min(1, 'Workspace name cannot be empty').optional(),
-  description: z.string().optional(),
-  slug: z.string().optional(),
-  status: WorkspaceStatusSchema.optional(),
-});
-
-export const WorkspaceSchema = z.object({
-  id: z.uuid('Invalid UUID format'),
-  name: z.string(),
-  description: z.string().nullable(),
-  slug: z.string().nullable(),
-  created_at: z.date().nullable(),
-  updated_at: z.date(),
-  status: WorkspaceStatusSchema,
-});
 
 // =============================================
 // WorkspaceMember Schema

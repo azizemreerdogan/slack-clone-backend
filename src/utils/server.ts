@@ -1,18 +1,10 @@
 import fastify from "fastify";
 import jwtPlugin from "@fastify/jwt";
 import { env } from "../config/env.js"
-
-declare module "@fastify/jwt" {
-    interface FastifyJWT {
-        user: {
-            id: string;
-            email: string;
-        }
-    }
-}
 import { userRoutes } from "../modules/user/user.route.js"
 import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod'
 import { errorHandler } from "../middleware/errorHandler.js";
+import "../types/fastify-jwt.d.js";
 
 export async function buildServer(){
     const app = fastify(
