@@ -23,3 +23,4 @@ export const ChannelSchema = z.object({
 });
 
 export type createChannelInput = z.infer<typeof ChannelCreateSchema>;
+export type updateChannelInput = z.infer<typeof ChannelUpdateSchema>
