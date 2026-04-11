@@ -1,0 +1,315 @@
+{
+  "info": {
+    "name": "Slack Clone Backend",
+    "description": "Full API collection for slack-clone-backend. Login/Register saves JWT into `token` collection variable automatically. Set `baseUrl`, then flow through: Register → Create Workspace → Create Channel → Send Message.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "b1c3a7f8-slack-clone-backend"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "", "type": "string" },
+    { "key": "workspace_id", "value": "", "type": "string" },
+    { "key": "channel_id", "value": "", "type": "string" },
+    { "key": "message_id", "value": "", "type": "string" },
+    { "key": "parent_msg_id", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) pm.collectionVariables.set('token', res.token);",
+                  "if (res.user && res.user.id) pm.collectionVariables.set('user_id', res.user.id);",
+                  "pm.test('status 200/201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/register", "host": ["{{baseUrl}}"], "path": ["register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aziz\",\n  \"email\": \"aziz@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) pm.collectionVariables.set('token', res.token);",
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aziz@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/delete", "host": ["{{baseUrl}}"], "path": ["delete"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workspaces",
+      "item": [
+        {
+          "name": "Create Workspace",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res.id || (res.workspace && res.workspace.id);",
+                  "if (id) pm.collectionVariables.set('workspace_id', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "create"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme\",\n  \"description\": \"Test workspace\",\n  \"slug\": \"acme\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Workspace",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/update/{{workspace_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", "update", "{{workspace_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Inc\",\n  \"description\": \"Updated description\",\n  \"status\": \"ACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Workspace",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/workspaces/",
+              "host": ["{{baseUrl}}"],
+              "path": ["workspaces", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Channels",
+      "item": [
+        {
+          "name": "Create Channel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res.id || (res.channel && res.channel.id);",
+                  "if (id) pm.collectionVariables.set('channel_id', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/channels/create/{{workspace_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["channels", "create", "{{workspace_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"general\",\n  \"channel_type\": \"PUBLIC\",\n  \"workspace_id\": \"{{workspace_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Channel",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/channels/update/{{channel_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["channels", "update", "{{channel_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"general-updated\",\n  \"is_archived\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Channel",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/channels/{{channel_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["channels", "{{channel_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Get Channel Messages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const id = res.id || (res.message && res.message.id);",
+                  "if (id) {",
+                  "  pm.collectionVariables.set('message_id', id);",
+                  "  pm.collectionVariables.set('parent_msg_id', id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello world\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Reply (threaded)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This is a reply\",\n  \"parent_msg_id\": \"{{parent_msg_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Message",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}/{{message_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}", "{{message_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Edited content\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Message Replies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}/{{message_id}}/replies",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}", "{{message_id}}", "replies"]
+            }
+          }
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{workspace_id}}/channels/{{channel_id}}/{{message_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["messages", "{{workspace_id}}", "channels", "{{channel_id}}", "{{message_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
