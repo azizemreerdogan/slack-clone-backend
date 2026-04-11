@@ -6,6 +6,8 @@ export const errorHandler = (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
+  request.log.error({ err: error }, 'request failed');
+
   if (error instanceof AppError) {
     return reply.code(error.statusCode).send({
       error: {

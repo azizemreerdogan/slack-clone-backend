@@ -22,5 +22,13 @@ export const ChannelSchema = z.object({
   workspace_id: z.uuid('Invalid UUID format'),
 });
 
+export const WorkspaceIdParamsSchema = z.object({
+  workspace_id: z.uuid('Invalid UUID format'),
+});
+
+export const ChannelIdParamsSchema = z.object({
+  channel_id: z.uuid('Invalid UUID format'),
+});
+
 export type createChannelInput = z.infer<typeof ChannelCreateSchema>;
 export type updateChannelInput = z.infer<typeof ChannelUpdateSchema>

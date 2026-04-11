@@ -4,6 +4,7 @@ import { env } from "../config/env.js"
 import { userRoutes } from "../modules/user/user.route.js"
 import { messageRoutes } from "../modules/message/message.route.js"
 import { workspaceRoutes } from "../modules/workspace/workspace.route.js"
+import { workspaceMemberRoutes } from "../modules/workspaceMember/workspaceMember.route.js"
 import { channelRoutes } from "../modules/channel/channel.route.js"
 import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod'
 import { errorHandler } from "../middleware/errorHandler.js";
@@ -37,6 +38,7 @@ export async function buildServer(){
     //register routes
     app.register(userRoutes)
     app.register(workspaceRoutes, { prefix: '/workspaces' })
+    app.register(workspaceMemberRoutes, { prefix: '/workspace-members' })
     app.register(channelRoutes, { prefix: '/channels' })
     app.register(messageRoutes, { prefix: '/messages' })
     

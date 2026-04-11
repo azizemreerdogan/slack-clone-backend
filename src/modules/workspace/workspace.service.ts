@@ -2,19 +2,29 @@ import type { createWorkspaceInput, updateWorkspaceInput } from "./workspace.sch
 import prisma from "../../lib/prisma.js";
 import { AppError } from "../../errors/AppError.js";
 import { Prisma } from "../../../generated/prisma/client.js";
+import { createWorkspaceOwner } from "../workspaceMember/workspaceMember.service.js";
 
-export async function createWorkspace(createWorkspaceInput: createWorkspaceInput){
+
+export async function createWorkspace(user_id: string,createWorkspaceInput: createWorkspaceInput){
     const {name, description, slug} = createWorkspaceInput;
 
-    const existingWorkspace = await prisma.workspace.findUnique({where: {slug}})
-
-    if (existingWorkspace) {
-        throw new AppError(409, 'A workspace with this slug already exists')
-    }
-
-    return await prisma.workspace.create({
+    try{
+        const workspace =  await prisma.workspace.create({
         data: { name, description: description ?? null, slug }
-    })
+        })
+
+        await createWorkspaceOwner(user_id, workspace.id)
+
+        return workspace
+    }catch(e){
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+            throw new AppError(409, 'Workspace already exists with same slug')
+        }
+        throw e
+    }
+    
+
+    
 }
 
 export async function getWorkspace(slug: string){

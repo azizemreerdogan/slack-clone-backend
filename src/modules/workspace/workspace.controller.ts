@@ -7,10 +7,11 @@ export async function createWorkspaceHandler(request: FastifyRequest<
         Body: createWorkspaceInput
     }>, reply: FastifyReply){
         const body = request.body;
+        const user = request.user;
         
 
         try{
-            const workspace = await createWorkspace(body);
+            const workspace = await createWorkspace(user.id,body);
 
             console.log(workspace);
 
