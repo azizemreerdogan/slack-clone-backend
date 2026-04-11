@@ -113,7 +113,6 @@ model WorkspaceMember {
   display_name   String?
   member_status  MemberStatus?
   joined_at      DateTime?
-
   channel_members ChannelMember[]
   messages        Message[]
   notifications   Notification[]

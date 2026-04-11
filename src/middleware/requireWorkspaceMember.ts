@@ -21,4 +21,6 @@ export async function requireWorkspaceMember(request: FastifyRequest<
     if (!isWorkspaceMember) {
         throw new AppError(403, "Forbidden", "WORKSPACE_ACCESS_DENIED");
     }
+
+    request.workspaceMember = isWorkspaceMember;
 }

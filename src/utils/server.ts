@@ -2,6 +2,7 @@ import fastify from "fastify";
 import jwtPlugin from "@fastify/jwt";
 import { env } from "../config/env.js"
 import { userRoutes } from "../modules/user/user.route.js"
+import { messageRoutes } from "../modules/message/message.route.js"
 import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod'
 import { errorHandler } from "../middleware/errorHandler.js";
 import "../types/fastify-jwt.d.js";
@@ -33,6 +34,7 @@ export async function buildServer(){
     
     //register routes
     app.register(userRoutes)
+    app.register(messageRoutes, { prefix: '/messages' })
     
     return app;
 }
