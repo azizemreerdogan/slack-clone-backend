@@ -140,9 +140,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/workspaces/",
+              "raw": "{{baseUrl}}/workspaces/acme",
               "host": ["{{baseUrl}}"],
-              "path": ["workspaces", ""]
+              "path": ["workspaces", "acme"]
             }
           }
         }

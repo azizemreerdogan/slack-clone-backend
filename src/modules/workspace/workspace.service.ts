@@ -22,9 +22,6 @@ export async function createWorkspace(user_id: string,createWorkspaceInput: crea
         }
         throw e
     }
-    
-
-    
 }
 
 export async function getWorkspace(slug: string){
@@ -32,6 +29,7 @@ export async function getWorkspace(slug: string){
     if(!workspace){
         throw new AppError(404, "Workspace with this slug does not exist")
     }
+    return workspace;
 }
 
 

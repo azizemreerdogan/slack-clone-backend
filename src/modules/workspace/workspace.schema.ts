@@ -17,9 +17,13 @@ export const WorkspaceUpdateSchema = z.object({
   status: WorkspaceStatusSchema.optional(),
 });
 
-export const WorkspaceParamsSchema = z.object({
+export const WorkspaceParamsSchemaWId = z.object({
   workspace_id: z.uuid('Invalid UUID format'),
 });
+
+export const WorkspaceParamsSchemaSlug = z.object({
+  slug: z.string()
+})
 
 export const WorkspaceSchema = z.object({
   id: z.uuid('Invalid UUID format'),
