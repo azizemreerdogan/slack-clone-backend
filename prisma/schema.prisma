@@ -62,6 +62,7 @@ enum NotificationType {
   INVITE_RECEIVED
 }
 
+//Used to identify from where the notification is pushed.
 enum EntityType {
   TASK
   MESSAGE
