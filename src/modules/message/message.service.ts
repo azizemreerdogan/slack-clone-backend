@@ -2,6 +2,8 @@ import type { SendMessageInput, EditMessageInput } from './message.schema.js'
 import prisma from '../../lib/prisma.js'
 import { AppError } from '../../errors/AppError.js'
 import { Prisma } from '../../../generated/prisma/client.js'
+import { bus } from '../../lib/events.js'
+
 
 export async function sendMessage(
   input: SendMessageInput,
@@ -27,7 +29,7 @@ export async function sendMessage(
     }
   }
 
-  return await prisma.message.create({
+  const message = await prisma.message.create({
     data: {
       channel_id,
       sender_id,
@@ -36,6 +38,16 @@ export async function sendMessage(
       created_at: new Date(),
     },
   })
+  
+  //Created message event is emitted after db write.
+  bus.emit("message.created",{
+    message_id: message.id,
+    channel_id: channel_id,
+    sender_id: sender_id,
+    content: message.content,
+    parent_msg_id: message.parent_msg_id ?? null
+  });
+
 }
 
 

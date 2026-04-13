@@ -9,6 +9,7 @@ import { channelRoutes } from "../modules/channel/channel.route.js"
 import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod'
 import { errorHandler } from "../middleware/errorHandler.js";
 import "../types/fastify-jwt.d.js";
+import { registerNotificationListeners } from "../modules/notification/notification.listener.js";
 
 export async function buildServer(){
     const app = fastify(
@@ -24,7 +25,8 @@ export async function buildServer(){
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
     app.setErrorHandler(errorHandler);
-    
+
+   
     
     //Bu şekilde register edebiliyoruz bunu ayrı dosyada yapıp register etmeyi araştır!
     //register plugins
@@ -34,6 +36,9 @@ export async function buildServer(){
             expiresIn: env.JWT_EXPIRES_IN
         }
     })
+
+    //Register for notification listener 
+    registerNotificationListeners(app)
     
     //register routes
     app.register(userRoutes)

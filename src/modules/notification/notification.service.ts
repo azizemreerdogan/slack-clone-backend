@@ -4,8 +4,6 @@ import prisma from "../../lib/prisma.js";
 export async function createNotifications(
     inputs: createNotificationInput[],)
     {
-        
-        
         if(inputs.length == 0){
             return
         }
