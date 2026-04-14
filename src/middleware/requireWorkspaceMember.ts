@@ -9,7 +9,7 @@ export async function requireWorkspaceMember(request: FastifyRequest<
     const user = request.user
     const workspace_id = request.params.workspace_id;
 
-    const isWorkspaceMember = await prisma.workspaceMember.findUnique({
+    const workspaceMember = await prisma.workspaceMember.findUnique({
         where: {
             user_id_workspace_id: {
                 user_id: user.id,
@@ -18,9 +18,9 @@ export async function requireWorkspaceMember(request: FastifyRequest<
         },
     });
 
-    if (!isWorkspaceMember) {
+    if (!workspaceMember) {
         throw new AppError(403, "Forbidden", "WORKSPACE_ACCESS_DENIED");
     }
 
-    request.workspaceMember = isWorkspaceMember;
+    request.workspaceMember = workspaceMember;
 }

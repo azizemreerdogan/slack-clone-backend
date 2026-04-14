@@ -1,11 +1,16 @@
 import { z } from 'zod'
+import { WorkspaceMemberCreateSchema } from '../user/user.schema.js';
 export const ChannelTypeSchema = z.enum(['PUBLIC', 'PRIVATE', 'DM', 'GROUP_DM']);
 
 export const ChannelCreateSchema = z.object({
   name: z.string().min(1, 'Channel name cannot be empty'),
   channel_type: ChannelTypeSchema.default('PUBLIC'),
-  workspace_id: z.uuid('Invalid UUID format'),
 });
+
+export const DmChannelCreateSchema = z.object({
+  name: z.string().nullable(),
+  channel_type: ChannelTypeSchema.default('DM'),
+})
 
 export const ChannelUpdateSchema = z.object({
   name: z.string().min(1, 'Channel name cannot be empty').optional(),
@@ -31,4 +36,5 @@ export const ChannelIdParamsSchema = z.object({
 });
 
 export type createChannelInput = z.infer<typeof ChannelCreateSchema>;
-export type updateChannelInput = z.infer<typeof ChannelUpdateSchema>
+export type updateChannelInput = z.infer<typeof ChannelUpdateSchema>;
+export type createDMChannelInput = z.infer<typeof DmChannelCreateSchema>;
