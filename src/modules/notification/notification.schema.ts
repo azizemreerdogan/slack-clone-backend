@@ -1,7 +1,15 @@
 import { z } from "zod";
 
 export const EntityTypeSchema = z.enum(['TASK', 'MESSAGE', 'INVITATION']);
-export const NotificationTypeSchema = z.enum(['DM_RECEIVED', 'MESSAGE_MENTION', 'THREAD_REPLY', 'TASK_ASSIGNED', 'INVITE_RECEIVED']);
+export const NotificationTypeSchema = z.enum([
+  'DM_RECEIVED',
+  'MESSAGE_MENTION',
+  'CHANNEL_MENTION',
+  'HERE_MENTION',
+  'THREAD_REPLY',
+  'TASK_ASSIGNED',
+  'INVITE_RECEIVED'
+]);
 
 export const NotificationCreateSchema = z.object({
   workspace_member_id: z.uuid('Invalid UUID format'),

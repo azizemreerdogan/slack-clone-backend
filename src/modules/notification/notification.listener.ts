@@ -6,6 +6,7 @@ import { createNotifications } from "./notification.service.js";
 
 export function registerNotificationListeners(app: FastifyInstance){
 
+    
     //On message creation
     bus.on("message.created", (e) => {
         handleMessageCreated(e)
