@@ -14,13 +14,13 @@ export async function realtimePlugin(app: FastifyInstance){
             const payload = await req.jwtVerify<{id: string}>();
             user_id = payload.id;
         }catch(e){
-            socket.close("1008", "unauthorized");
+            socket.close(1008, "unauthorized");
             return;
         }
 
         registry.add(user_id, socket)
         //All of the workspaceMembers associated with user will be ONLINE.
-        prisma.workspaceMember.updateMany({
+        await prisma.workspaceMember.updateMany({
             where: {user_id: user_id},
             data: {
                 member_status: MemberStatus.ONLINE
@@ -48,9 +48,6 @@ export async function realtimePlugin(app: FastifyInstance){
             })
             }
         })
-
-
-
 
     });
 

@@ -44,6 +44,5 @@ export const registry = {
         for(const socket of set){
             if(socket.readyState === socket.OPEN) socket.send(data);
         }
-        
     }
 }

@@ -1,8 +1,7 @@
 import type { MessageCreatedEvent } from "../../lib/events.js";
 import type { createNotificationInput } from "./notification.schema.js";
 import prisma from "../../lib/prisma.js";
-import { ChannelType, MemberStatus, NotificationType } from "../../../generated/prisma/enums.js";
-import type { WorkspaceMember } from "../../../generated/prisma/client.js";
+import { ChannelType, EntityType, MemberStatus, NotificationType } from "../../../generated/prisma/enums.js";
 
 //Handler for message.created, we return createNotificationInput array and that array will be processed by notification.listener
 export async function handleMessageCreated(e: MessageCreatedEvent):
@@ -24,7 +23,7 @@ Promise<createNotificationInput[]>{
             inputs.push(
                 {
                     workspace_member_id: parent.sender_id,
-                    entity_type: "MESSAGE",
+                    entity_type: EntityType.MESSAGE,
                     entity_id: e.message_id,
                     notification_type: NotificationType.THREAD_REPLY
                 }
@@ -55,7 +54,7 @@ Promise<createNotificationInput[]>{
         inputs.push(
             ...mentionedMembers.map((m) => ({
                 workspace_member_id: m.id,
-                entity_type: "MESSAGE" as const,
+                entity_type: EntityType.MESSAGE,
                 entity_id: e.message_id,
                 notification_type: NotificationType.MESSAGE_MENTION
             }))
@@ -86,7 +85,7 @@ Promise<createNotificationInput[]>{
         inputs.push(
             ...channelMembers.map((cm) => ({
                 workspace_member_id: cm.workspace_member_id,
-                entity_type: "MESSAGE" as const,
+                entity_type: EntityType.MESSAGE,
                 entity_id: e.message_id,
                 notification_type: notifType
             }))
@@ -111,7 +110,7 @@ Promise<createNotificationInput[]>{
         inputs.push(
             ...recipients.map((m) => ({
                 workspace_member_id: m.id,
-                entity_type: "MESSAGE" as const,
+                entity_type: EntityType.MESSAGE,
                 entity_id: e.message_id,
                 notification_type: NotificationType.DM_RECEIVED
             }))
@@ -120,6 +119,6 @@ Promise<createNotificationInput[]>{
     return inputs;
 }
 
-//Handler for channel.member_added notify the added member.
+//TODO: Handler for channel.member_added notify the added member.
 
-//Handler for workspace.invite, notify the invited user.
+//TODO: Handler for workspace.invite, notify the invited user.

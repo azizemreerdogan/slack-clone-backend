@@ -1,49 +1,61 @@
-import { EventEmitter } from 'node:events'
+import { z } from "zod";
+import { EventEmitter } from "node:events";
+import { Redis } from "ioredis";
+import { env } from "../config/env.js";
+import { EntityType, NotificationType } from "../../generated/prisma/enums.js";
 
-// ---- Event payload types ----
 
-export interface MessageCreatedEvent {
-  message_id: string
-  channel_id: string
-  sender_id: string
-  content: string | null
-  parent_msg_id: string | null
-}
+export const eventSchemas = {
+  "message.created": z.object({
+    message_id: z.string(),
+    channel_id: z.string(),
+    sender_id: z.string(),
+    content: z.string().nullable(),
+    parent_msg_id: z.string().nullable(),
+  }),
+  "message.edited": z.object({ message_id: z.string(), channel_id: z.string() }),
+  "message.deleted": z.object({ message_id: z.string(), channel_id: z.string() }),
+  "notification.created": z.object({
+    notification_id: z.string(),
+    user_id: z.string(),
+    workspace_member_id: z.string(),
+    entity_type: z.enum(EntityType),
+    entity_id: z.string().nullable(),
+    notification_type: z.enum(NotificationType),
+    created_at: z.string().nullable(),
+    is_read: z.boolean(),
+  }),
+} as const;
 
-export interface MessageEditedEvent {
-  message_id: string
-  channel_id: string
-}
+export type EventMap = {
+  [K in keyof typeof eventSchemas]: z.infer<(typeof eventSchemas)[K]>;
+};
 
-export interface MessageDeletedEvent {
-  message_id: string
-  channel_id: string
-}
+export type MessageCreatedEvent = EventMap["message.created"];
 
-// ---- Event map ----
+const pub = new Redis(env.REDIS_URL);
+const sub = new Redis(env.REDIS_URL);
+const emitter = new EventEmitter();
 
-export interface EventMap {
-  'message.created': MessageCreatedEvent
-  'message.edited': MessageEditedEvent
-  'message.deleted': MessageDeletedEvent
-}
-
-// ---- Typed bus ----
+sub.on("message", (channel, raw) => {
+  const schema = eventSchemas[channel as keyof typeof eventSchemas];
+  if (!schema) return;
+  const parsed = schema.safeParse(JSON.parse(raw));
+  if (!parsed.success) return; // drift/garbage
+  emitter.emit(channel, parsed.data);
+});
 
 class TypedEventBus {
-  private emitter = new EventEmitter()
-
-  emit<K extends keyof EventMap>(event: K, payload: EventMap[K]): void {
-    this.emitter.emit(event, payload)
+  emit<K extends keyof EventMap>(event: K, payload: EventMap[K]) {
+    pub.publish(event, JSON.stringify(payload));
   }
-
-  on<K extends keyof EventMap>(event: K, handler: (payload: EventMap[K]) => void): void {
-    this.emitter.on(event, handler as (...args: unknown[]) => void)
+  on<K extends keyof EventMap>(event: K, handler: (p: EventMap[K]) => void) {
+    if (emitter.listenerCount(event) === 0) sub.subscribe(event);
+    emitter.on(event, handler as (...a: unknown[]) => void);
   }
-
-  off<K extends keyof EventMap>(event: K, handler: (payload: EventMap[K]) => void): void {
-    this.emitter.off(event, handler as (...args: unknown[]) => void)
+  off<K extends keyof EventMap>(event: K, handler: (p: EventMap[K]) => void) {
+    emitter.off(event, handler as (...a: unknown[]) => void);
   }
 }
 
-export const bus = new TypedEventBus()
+export const bus = new TypedEventBus();
