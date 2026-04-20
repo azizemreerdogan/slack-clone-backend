@@ -8,6 +8,7 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  REDIS_URL: z.url().default("localhost:6379")
 })
 
 export const env = envSchema.parse(process.env)

@@ -10,6 +10,8 @@ import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod
 import { errorHandler } from "../middleware/errorHandler.js";
 import "../types/fastify-jwt.d.js";
 import { registerNotificationListeners } from "../modules/notification/notification.listener.js";
+import { realtimePlugin } from "../modules/realtime/realtime.plugin.js";
+import { registerRealtimeListeners } from "../modules/realtime/realtime.listener.js";
 
 export async function buildServer(){
     const app = fastify(
@@ -38,7 +40,10 @@ export async function buildServer(){
     })
 
     //Register for notification listener 
-    registerNotificationListeners(app)
+    registerNotificationListeners(app);
+    registerRealtimeListeners(app);
+    app.register(realtimePlugin);
+
     
     //register routes
     app.register(userRoutes)

@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { EntityType, NotificationType } from "../../../generated/prisma/enums.js";
 
-export const EntityTypeSchema = z.enum(['TASK', 'MESSAGE', 'INVITATION']);
-export const NotificationTypeSchema = z.enum(['DM_RECEIVED', 'MESSAGE_MENTION', 'THREAD_REPLY', 'TASK_ASSIGNED', 'INVITE_RECEIVED']);
+export const EntityTypeSchema = z.enum(EntityType);
+export const NotificationTypeSchema = z.enum(NotificationType);
 
 export const NotificationCreateSchema = z.object({
   workspace_member_id: z.uuid('Invalid UUID format'),
@@ -14,6 +15,14 @@ export const NotificationUpdateSchema = z.object({
   is_read: z.boolean().optional(),
 });
 
+export const NotificationParamsUserIdSchema = z.object({
+  user_id: z.string(),
+})
+
+export const NotificationParamsNotifIdSchema = z.object({
+  notification_id: z.string(),
+})
+
 export const NotificationSchema = z.object({
   id: z.uuid('Invalid UUID format'),
   workspace_member_id: z.uuid('Invalid UUID format'),
@@ -25,4 +34,9 @@ export const NotificationSchema = z.object({
 });
 
 
+
+
 export type createNotificationInput = z.infer<typeof NotificationCreateSchema>;
+export type updateNotificationInput = z.infer<typeof NotificationUpdateSchema>;
+export type userIdParamsNotificationInput = z.infer<typeof NotificationParamsUserIdSchema>;
+export type notifIdParamsNotificationInput = z.infer<typeof NotificationParamsNotifIdSchema>;
