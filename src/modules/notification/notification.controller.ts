@@ -1,5 +1,5 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { markAllReadNotifications, readNotification } from "./notification.service.js";
+import { getNotifications, markAllReadNotifications, readNotification } from "./notification.service.js";
 import type { notifIdParamsNotificationInput } from "./notification.schema.js";
 import { AppError } from "../../errors/AppError.js";
 
@@ -26,3 +26,19 @@ export async function markAllReadHandler(
     const result = await markAllReadNotifications(workspaceMember.id);
     return rep.code(200).send({ updated: result.count });
 }
+
+export async function getNotificationsHandler(
+    req: FastifyRequest<{ Params: { workspace_id: string }; Querystring: {limit: number, cursor_string?: string}}>,
+    rep: FastifyReply,
+){
+    const query = req.query;
+    const workspaceMember = req.workspaceMember;
+    if(!workspaceMember) {
+        throw new AppError(403, "Forbidden", "WORKSPACE_ACCESS_ERROR")
+    }
+    const workspace_member_id = workspaceMember.id
+    
+    const result = await getNotifications(query.limit, workspace_member_id, query.cursor_string);
+    return rep.code(200).send({notifications: result.notifications, next_cursor: result.next_cursor})
+}
+

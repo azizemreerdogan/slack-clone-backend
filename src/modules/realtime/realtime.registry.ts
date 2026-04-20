@@ -35,7 +35,7 @@ export const registry = {
         return connections.has(user_id);
     },
 
-    //Send all of the sockets available
+    //Send all of the sockets available (USER SPESIFIC!)
     send(user_id: string, payload: unknown): void{
         const set = connections.get(user_id);
         if(!set) return;

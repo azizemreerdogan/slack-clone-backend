@@ -52,6 +52,43 @@ export async function createNotifications(
         }
     }
 
+    
+    
+//Get notifications with cursor pagination 
+export async function getNotifications(limit: number = 20, workspace_member_id: string, cursor_string?: string){
+    let cursor : {created_at: string, id: string} | undefined;
+    if(cursor_string){
+         cursor = JSON.parse(
+        Buffer.from(cursor_string, "base64url").toString()
+        );
+    }
+    
+    
+    const notifications = await prisma.notification.findMany({
+        where:{
+            workspace_member_id: workspace_member_id,
+            ...(cursor && {
+                OR: [
+                    { created_at: { lt: new Date(cursor.created_at) } },
+                    { created_at: new Date(cursor.created_at), id: { lt: cursor.id } },
+                ],
+            })
+        },
+        orderBy: [
+            {created_at: "desc"},
+            {id: "desc"}
+        ],
+        take: limit
+    })
+    
+    const last = notifications[notifications.length -1]
+    const next_cursor = notifications.length == limit && last ? 
+                    Buffer.from(JSON.stringify({created_at: last.created_at, id: last.id})).toString("base64url") :
+                    null
+    return {notifications, next_cursor};
+    
+    
+}
 
 //Mark a single notification as read. Scoped by the authenticated user via workspace_member relation.
 export async function readNotification(notification_id: string, user_id: string){
@@ -66,6 +103,8 @@ export async function readNotification(notification_id: string, user_id: string)
     if (count === 0) {
         throw new AppError(404, "Notification not found", "NOTIFICATION_NOT_FOUND");
     }
+    
+    //bus.emit(notification.read) for a single notification
 }
 
 //Mark all notifications as read for a single workspace membership.
@@ -74,4 +113,6 @@ export async function markAllReadNotifications(workspace_member_id: string){
         where: { workspace_member_id, is_read: false },
         data: { is_read: true },
     })
+    
+    //bus.emit (notification.read) for all of the users notification
 }

@@ -33,9 +33,15 @@ export async function realtimePlugin(app: FastifyInstance){
         socket.on("pong", () => {isAlive = true});
 
         const ping = setInterval(() => {
-            if(socket.readyState === socket.OPEN) socket.ping()
+            if(!isAlive){
+                socket.terminate();
+                return;
+            }
+            isAlive = false;
+            socket.ping();
         }, 30000)
-
+        
+        
         socket.on("close", () => {
             clearInterval(ping);
             const {wasLast} = registry.remove(user_id,socket);
