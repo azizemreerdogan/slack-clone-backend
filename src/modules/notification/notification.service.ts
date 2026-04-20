@@ -92,27 +92,41 @@ export async function getNotifications(limit: number = 20, workspace_member_id: 
 
 //Mark a single notification as read. Scoped by the authenticated user via workspace_member relation.
 export async function readNotification(notification_id: string, user_id: string){
-    const { count } = await prisma.notification.updateMany({
+    const notification = await prisma.notification.findFirst({
         where: {
             id: notification_id,
             workspace_member: { user_id },
         },
+    });
+
+    if (!notification) {
+        throw new AppError(404, "Notification not found", "NOTIFICATION_NOT_FOUND");
+    }
+
+    await prisma.notification.update({
+        where: { id: notification_id },
         data: { is_read: true },
     });
 
-    if (count === 0) {
-        throw new AppError(404, "Notification not found", "NOTIFICATION_NOT_FOUND");
-    }
-    
-    //bus.emit(notification.read) for a single notification
+    bus.emit("notification.read", {
+        user_id,
+        notification_id: notification.id,
+        workspace_member_id: notification.workspace_member_id,
+        created_at: notification.created_at,
+    });
 }
 
 //Mark all notifications as read for a single workspace membership.
-export async function markAllReadNotifications(workspace_member_id: string){
-    return await prisma.notification.updateMany({
+export async function markAllReadNotifications(workspace_member_id: string, user_id: string){
+    const { count } = await prisma.notification.updateMany({
         where: { workspace_member_id, is_read: false },
         data: { is_read: true },
-    })
-    
-    //bus.emit (notification.read) for all of the users notification
+    });
+
+    bus.emit("notification.all_read", {
+        workspace_member_id,
+        user_id,
+    });
+
+    return { count };
 }

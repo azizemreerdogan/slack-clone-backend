@@ -19,12 +19,13 @@ export async function markAllReadHandler(
     rep: FastifyReply,
 ){
     const workspaceMember = req.workspaceMember;
+    const user = req.user
     if (!workspaceMember) {
         throw new AppError(403, "Forbidden", "WORKSPACE_ACCESS_DENIED");
     }
 
-    const result = await markAllReadNotifications(workspaceMember.id);
-    return rep.code(200).send({ updated: result.count });
+    const { count } = await markAllReadNotifications(workspaceMember.id, user.id);
+    return rep.code(200).send({ updated: count });
 }
 
 export async function getNotificationsHandler(

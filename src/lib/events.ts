@@ -25,6 +25,17 @@ export const eventSchemas = {
     created_at: z.string().nullable(),
     is_read: z.boolean(),
   }),
+  "notification.read": z.object({
+    notification_id: z.string(),
+    user_id: z.string(),
+    workspace_member_id: z.string(),
+    created_at: z.date().nullable()
+   }),
+   "notification.all_read": z.object({
+    user_id: z.string(),
+    workspace_member_id: z.string(),
+   })
+   
 } as const;
 
 export type EventMap = {
