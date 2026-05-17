@@ -6,6 +6,7 @@ import { messageRoutes } from "../modules/message/message.route.js"
 import { workspaceRoutes } from "../modules/workspace/workspace.route.js"
 import { workspaceMemberRoutes } from "../modules/workspaceMember/workspaceMember.route.js"
 import { channelRoutes } from "../modules/channel/channel.route.js"
+import { attachmentRoutes } from "../modules/attachment/attachment.route.js"
 import { validatorCompiler , serializerCompiler} from 'fastify-type-provider-zod'
 import { errorHandler } from "../middleware/errorHandler.js";
 import "../types/fastify-jwt.d.js";
@@ -51,6 +52,7 @@ export async function buildServer(){
     app.register(workspaceMemberRoutes, { prefix: '/workspace-members' })
     app.register(channelRoutes, { prefix: '/channels' })
     app.register(messageRoutes, { prefix: '/messages' })
+    app.register(attachmentRoutes, { prefix: '/attachments' })
     
     return app;
 }
