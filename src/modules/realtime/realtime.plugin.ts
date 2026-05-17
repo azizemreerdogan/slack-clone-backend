@@ -1,8 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import websocket from "@fastify/websocket"
 import { registry } from "../realtime/realtime.registry.js"
+import { handleCall } from "../realtime/realtime.handlers.js"
 import prisma from "../../lib/prisma.js"
 import { MemberStatus } from "../../../generated/prisma/enums.js";
+import { raw } from "@prisma/client/runtime/client";
 
 export async function realtimePlugin(app: FastifyInstance){
     await app.register(websocket);
@@ -40,6 +42,39 @@ export async function realtimePlugin(app: FastifyInstance){
             isAlive = false;
             socket.ping();
         }, 30000)
+
+        socket.on("message" , (raw : string) => {
+            let message;
+            
+            try {
+                message = JSON.parse(raw.toString());
+            } catch (e) {
+                socket.send(JSON.stringify({
+                    type: "error",
+                    error: "Invalid JSON"
+                }));
+                return;
+            }
+
+            const { type, payload } = message;
+
+            if (typeof type !== "string") {
+                socket.send(JSON.stringify({
+                    type: "error",
+                    error: "type is required"
+                }));
+                return;
+            }
+
+            if (type.startsWith("call.")) {
+                handleCall({
+                    user_id,
+                    socket,
+                    type,
+                    payload: payload || {}
+                });
+            }
+        })
         
         
         socket.on("close", () => {

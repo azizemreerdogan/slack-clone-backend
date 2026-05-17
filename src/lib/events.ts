@@ -3,6 +3,7 @@ import { EventEmitter } from "node:events";
 import { Redis } from "ioredis";
 import { env } from "../config/env.js";
 import { EntityType, NotificationType } from "../../generated/prisma/enums.js";
+import { ca } from "zod/v4/locales";
 
 
 export const eventSchemas = {
@@ -34,6 +35,35 @@ export const eventSchemas = {
    "notification.all_read": z.object({
     user_id: z.string(),
     workspace_member_id: z.string(),
+   }),
+   "call.invite": z.object({
+      call_id: z.string(),
+      sender_id: z.string(),
+      recipients: z.array(z.string()),
+      workspace_member_id: z.string(),
+      created_at: z.date().nullable(),
+   }),
+   "call.accept": z.object({
+      call_id: z.string(),
+      user_id: z.string(),
+      workspace_member_id: z.string()
+   }),
+   "call.decline": z.object({
+      call_id: z.string(),
+      user_id: z.string(),
+      workspace_member_id: z.string(),
+   }),
+   "call.leave": z.object({
+      call_id: z.string(),
+      user_id: z.string(),
+      created_at: z.date().nullable()
+   }),
+   "call.ended": z.object({
+      call_id: z.string(),
+      sender_id: z.string(),
+      recipients: z.array(z.string()),
+      workspace_member_id: z.string(),
+      ended_at: z.date().nullable(),
    })
    
 } as const;

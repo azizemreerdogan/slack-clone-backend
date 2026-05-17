@@ -76,6 +76,20 @@ enum AttachStatus {
   READY
 }
 
+enum CallStatus {
+    RINGING
+    ACTIVE
+    ENDED
+    MISSED
+}
+
+enum ParticipantStatus {
+  INVITED
+  ACCEPTED
+  DECLINED
+  LEFT
+}
+
 // =============================================
 // MODELS
 // =============================================
@@ -107,6 +121,7 @@ model Workspace {
 
   members     WorkspaceMember[]
   channels    Channel[]
+  attachments Attachment[]
 
   @@map("workspace")
 }
@@ -124,7 +139,9 @@ model WorkspaceMember {
   channel_members ChannelMember[]
   messages        Message[]
   notifications   Notification[]
-  attachments Attachment[] @relation("UploadedAttachments")
+  attachments     Attachment[]      @relation("UploadedAttachments")
+  call_sessions   CallSession[]     @relation("StartedCallSessions")
+  call_participations CallParticipant[]
 
   @@unique([user_id, workspace_id])
   @@map("workspace_members")
@@ -141,6 +158,7 @@ model Channel {
 
   members       ChannelMember[]
   messages      Message[]
+  call_sessions CallSession[]
 
   @@map("channel")
 }
@@ -192,6 +210,7 @@ model Attachment{
   id  String @id @default(uuid())
   filename String
   workspace_id String
+  workspace    Workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
   uploader_member_id String
   uploader     WorkspaceMember @relation("UploadedAttachments", fields: [uploader_member_id], references: [id], onDelete: NoAction)
   message_id String?
@@ -204,4 +223,34 @@ model Attachment{
   @@map("attachment")
   @@index([workspace_id, attach_status, created_at])
   @@index([message_id])
+}
+
+model CallSession {
+  id           String          @id @default(uuid())
+  channel      Channel         @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  channel_id   String
+  starter      WorkspaceMember @relation("StartedCallSessions", fields: [starter_id], references: [id], onDelete: Cascade)
+  starter_id   String
+  status       CallStatus
+  started_at   DateTime        @default(now())
+  ended_at     DateTime?
+
+  participants CallParticipant[]
+
+  @@map("call_session")
+  @@index([channel_id, started_at])
+}
+
+model CallParticipant {
+  id              String          @id @default(uuid())
+  call_session    CallSession     @relation(fields: [call_session_id], references: [id], onDelete: Cascade)
+  call_session_id String
+  member          WorkspaceMember @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  member_id       String
+  status          ParticipantStatus 
+  joined_at       DateTime        @default(now())
+  left_at         DateTime?
+
+  @@unique([call_session_id, member_id])
+  @@map("call_participant")
 }

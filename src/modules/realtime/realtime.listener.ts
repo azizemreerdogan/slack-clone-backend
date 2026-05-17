@@ -39,5 +39,5 @@ export function registerRealtimeListeners(app: FastifyInstance) {
         }
     })
 
-    //bus.on("notification.read") -> notification/readNotification 
+    
 }
